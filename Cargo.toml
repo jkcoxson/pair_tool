@@ -1,0 +1,14 @@
+[package]
+name = "pair_tool"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rfd = { version = "0.10.0" }
+rusty_libimobiledevice = { version = "0.1.7", features = ["static", "vendored" ] }
+plist_plus = { version = "0.2.1", features = ["static", "vendored" ] }
+log = { version = "0.4.17" }
+env_logger = { version = "0.9.1" }
+dialoguer = { version = "0.10.2" }
