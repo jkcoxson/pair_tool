@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Add architecture
-      run: dpkg --add-architecture armhf
+      run: sudo dpkg --add-architecture armhf
     - name: Update && upgrade
       run: apt update && apt upgrade -y
     - name: Install dependencies
