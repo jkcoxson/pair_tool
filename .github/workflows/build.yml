@@ -1,0 +1,51 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-x86_64:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+  
+  build-arm:
+    env: 
+      CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: /usr/lib/arm-linux-gnueabihf/pkgconfig/
+    
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Add architecture
+      run: dpkg --add-architecture armhf
+    - name: Update && upgrade
+      run: apt update && apt upgrade -y
+    - name: Install dependencies
+      run: apt install gcc-arm-linux-gnueabihf libgtk-3-dev:armhf pkg-config build-essential checkinstall git autoconf automake libtool-bin -y
+    - name: Add target
+      run: rustup target add armv7-unknown-linux-gnueabihf
+    - name: Build
+      run: cargo build --release --target=armv7-unknown-linux-gnueabihf
+    - name: Move binary
+      run: mv target/armv7-unknown-linux-gnueabihf/release/pair_tool armv7-pair_tool
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        # A file, directory or wildcard pattern that describes what to upload
+        path: armv7-pair_tool
