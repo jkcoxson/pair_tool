@@ -17,7 +17,7 @@ fn main() {
         Err(e) => {
             error!("Unable to look up devices! {:?}", e);
             println!("Make sure that you have usbmuxd running, and that you can connect to it");
-            exit_program(-1)
+            exit_program()
         }
     };
 
@@ -50,7 +50,7 @@ fn main() {
 
     if names.is_empty() {
         error!("No devices are connected!!");
-        exit_program(-1)
+        exit_program()
     }
 
     println!("\n");
@@ -99,7 +99,7 @@ fn main() {
                     Ok(i) => i,
                     Err(_) => {
                         error!("Invalid IP address");
-                        exit_program(-1)
+                        exit_program()
                     }
                 };
 
@@ -125,10 +125,10 @@ fn main() {
                 Err(e) => {
                     if e == LockdowndError::UnknownError {
                         println!("You need to set a passcode on your device to enable WiFi sync");
-                        exit_program(-1)
+                        exit_program()
                     } else {
                         println!("Error setting value: {:?}", e);
-                        exit_program(-1)
+                        exit_program()
                     }
                 }
             }
@@ -136,14 +136,14 @@ fn main() {
         3 => {
             if device.get_network() {
                 error!("Device must be plugged into USB");
-                exit_program(-1)
+                exit_program()
             }
             let lockdown_client = device.new_lockdownd_client("pairing_file_gen").unwrap();
             match lockdown_client.pair(None, None) {
                 Ok(_) => {}
                 Err(e) => {
                     println!("Unable to pair device: {:?}", e);
-                    exit_program(-1)
+                    exit_program()
                 }
             }
             println!("Pairing succeeded");
@@ -154,8 +154,8 @@ fn main() {
             unreachable!()
         }
     }
-
-    exit_program(0)
+    println!("Press any key to exit");
+    std::io::Read::read(&mut std::io::stdin(), &mut [0]).unwrap();
 }
 
 fn export_pairing_file(udid: String) {
@@ -163,7 +163,7 @@ fn export_pairing_file(udid: String) {
         Ok(p) => p,
         Err(e) => {
             error!("Failed to get pairing file: {:?}", e);
-            exit_program(-1)
+            exit_program()
         }
     }
     .to_string();
@@ -175,7 +175,7 @@ fn export_pairing_file(udid: String) {
         .pick_folder();
     if save_path.is_none() {
         println!("No path specified");
-        exit_program(-1)
+        exit_program()
     }
     let save_path = save_path.unwrap();
 
@@ -183,7 +183,7 @@ fn export_pairing_file(udid: String) {
         Ok(f) => f,
         Err(e) => {
             error!("Could not open the save file: {}", e);
-            exit_program(-1)
+            exit_program()
         }
     };
     match file.write(pairing_file.as_bytes()) {
@@ -192,13 +192,13 @@ fn export_pairing_file(udid: String) {
         }
         Err(e) => {
             error!("Unable to write to file: {:?}", e);
-            exit_program(-1)
+            exit_program()
         }
     }
 }
 
-fn exit_program(code: i32) -> ! {
+fn exit_program() -> ! {
     println!("Press any key to exit");
     std::io::Read::read(&mut std::io::stdin(), &mut [0]).unwrap();
-    std::process::exit(code)
+    panic!()
 }
